@@ -1,12 +1,27 @@
 import 'package:flutter/material.dart';
 import 'package:hello_world/routes/navigator_util.dart';
+import 'package:hello_world/api/home.dart';
 
 class FindPage extends StatefulWidget {
+  final String name = '12';
   @override
   _IndexPageState createState() => _IndexPageState();
 }
 
 class _IndexPageState extends State<FindPage> {
+  var homeApi = HomeApi();
+  var _list;
+  @override
+  void initState() {
+    super.initState();
+    print('init state${widget.name}');
+    homeApi.getServiceList((res) {
+      setState(() {
+        _list = res.data.display;
+      });
+    });
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -36,16 +51,32 @@ class _IndexPageState extends State<FindPage> {
   }
 
   Widget buildCenterRow(BuildContext context) {
+    if (_list == null) {
+      return Text('没有数据');
+    }
     return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
       children: <Widget>[
-        Text('我的服务'),
-        ListView.builder(
-            itemCount: 100,
-            shrinkWrap: true,
-            itemExtent: 50.0, //强制高度为50.0
-            itemBuilder: (BuildContext context, int index) {
-              return ListTile(title: Text("$index"));
-            })
+        Container(
+          padding: EdgeInsets.only(top: 10),
+          child: Text('我的服务',
+              textAlign: TextAlign.left,
+              style: TextStyle(
+                color: Color.fromARGB(255, 20, 20, 20),
+                fontSize: 18.0,
+                fontWeight: FontWeight.bold,
+                height: 1.2,
+                fontFamily: "Courier",
+              )),
+        ),
+        Container(
+          height: 500,
+          child: ListView.builder(
+              itemCount: _list.length,
+              shrinkWrap: true,
+              itemExtent: 50.0, //强制高度为50.0
+              itemBuilder: buildItem),
+        )
       ],
     );
   }
@@ -63,5 +94,9 @@ class _IndexPageState extends State<FindPage> {
         )
       ],
     );
+  }
+
+  Widget buildItem(BuildContext context, int index) {
+    return ListTile(title: Text("${_list[index].title}"));
   }
 }
